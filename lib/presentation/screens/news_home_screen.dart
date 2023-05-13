@@ -1,8 +1,5 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:news_app/data/network/http_client.dart';
 import 'package:news_app/presentation/screens/news_details_screen.dart';
 import 'package:news_app/presentation/widgets/news_item.dart';
 
@@ -14,9 +11,7 @@ class NewsHomeScreen extends StatefulWidget {
 }
 
 class _NewsHomeScreenState extends State<NewsHomeScreen> {
-  final _baseUrl = 'https://jsonplaceholder.typicode.com/posts';
   int _page = 0;
-  final int _limit = 20;
   bool _isFirstLoadRunning = false;
   bool _hasNextPage = true;
   bool _isLoadMoreRunning = false;
@@ -33,28 +28,22 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
 
       _page += 1; // Increase _page by 1
 
-      try {
-        final res =
-            await http.get(Uri.parse("$_baseUrl?_page=$_page&_limit=$_limit"));
-
-        final List fetchedPosts = json.decode(res.body);
-        if (fetchedPosts.isNotEmpty) {
+      BaseHttpClient().fetchPosts(_page).then((value) {
+        if (value.isNotEmpty) {
           setState(() {
-            _posts.addAll(fetchedPosts);
+            _posts.addAll(value);
           });
         } else {
           setState(() {
             _hasNextPage = false;
           });
         }
-      } catch (err) {
-        if (kDebugMode) {
-          print('Something went wrong!');
-        }
-      }
-
-      setState(() {
-        _isLoadMoreRunning = false;
+        setState(() {
+          _isLoadMoreRunning = false;
+        });
+      }).onError((error, stackTrace) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
       });
     }
   }
@@ -64,20 +53,17 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
       _isFirstLoadRunning = true;
     });
 
-    try {
-      final res =
-          await http.get(Uri.parse("$_baseUrl?_page=$_page&_limit=$_limit"));
-      setState(() {
-        _posts = json.decode(res.body);
-      });
-    } catch (err) {
-      if (kDebugMode) {
-        print('Something went wrong');
+    BaseHttpClient().fetchPosts(_page).then((value) {
+      if (value.isNotEmpty) {
+        setState(() {
+          print(value.toString());
+          _posts = value;
+          _isFirstLoadRunning = false;
+        });
       }
-    }
-
-    setState(() {
-      _isFirstLoadRunning = false;
+    }).onError((error, stackTrace) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
     });
   }
 
