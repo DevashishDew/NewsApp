@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class NewsItem extends StatelessWidget {
-  NewsItem({
+  const NewsItem({
     Key? key,
     required this.imageUrl,
     required this.title,
@@ -52,11 +52,12 @@ class NewsItem extends StatelessWidget {
                           color: Colors.blue,
                         )),
                     IconButton(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.thumb_up,
-                          color: Colors.blue,
-                        )),
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.thumb_up,
+                        color: Colors.blue,
+                      ),
+                    ),
                   ],
                 ),
               ],

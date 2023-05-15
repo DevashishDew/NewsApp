@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:news_app/data/network/http_client.dart';
+import 'package:news_app/data/models/my_posts.dart';
+import 'package:news_app/data/network/http_service.dart';
 import 'package:news_app/presentation/screens/news_details_screen.dart';
 import 'package:news_app/presentation/widgets/news_item.dart';
 
@@ -15,7 +16,7 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
   bool _isFirstLoadRunning = false;
   bool _hasNextPage = true;
   bool _isLoadMoreRunning = false;
-  List _posts = [];
+  List<MyPosts> _posts = [];
 
   void _loadMore() async {
     if (_hasNextPage == true &&
@@ -28,7 +29,7 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
 
       _page += 1; // Increase _page by 1
 
-      BaseHttpClient().fetchPosts(_page).then((value) {
+      HttpService().fetchPosts(_page).then((value) {
         if (value.isNotEmpty) {
           setState(() {
             _posts.addAll(value);
@@ -53,7 +54,7 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
       _isFirstLoadRunning = true;
     });
 
-    BaseHttpClient().fetchPosts(_page).then((value) {
+    HttpService().fetchPosts(_page).then((value) {
       if (value.isNotEmpty) {
         setState(() {
           print(value.toString());
@@ -95,8 +96,8 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
                           builder: (ctx) => NewsDetailsScreen(
                             imageUrl:
                                 'https://farm2.staticflickr.com/1533/26541536141_41abe98db3_z_d.jpg',
-                            title: _posts[index]['title'],
-                            body: _posts[index]['body'],
+                            title: _posts[index].title ?? '',
+                            body: _posts[index].body ?? '',
                           ),
                         ),
                       );
@@ -104,8 +105,8 @@ class _NewsHomeScreenState extends State<NewsHomeScreen> {
                     child: NewsItem(
                       imageUrl:
                           'https://farm2.staticflickr.com/1533/26541536141_41abe98db3_z_d.jpg',
-                      title: _posts[index]['title'],
-                      body: _posts[index]['body'],
+                      title: _posts[index].title ?? '',
+                      body: _posts[index].body ?? '',
                     ),
                   ),
                 ),
