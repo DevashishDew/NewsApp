@@ -1,19 +1,28 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:news_app/data/models/news_feed.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+class AddNewsScreen extends StatefulWidget {
+  const AddNewsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
+  State<AddNewsScreen> createState() => _AddNewsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _AddNewsScreenState extends State<AddNewsScreen> {
+  static const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final Random _rnd = Random();
+
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+
   final ImagePicker imgpicker = ImagePicker();
   String imagepath = "";
   String title = "";
@@ -68,6 +77,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (croppedfile != null) {
       imagefile = croppedfile;
+      imagepath = croppedfile.path;
       setState(() {});
     } else {
       print("Image is not cropped.");
@@ -77,13 +87,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   _saveImage() async {
     Uint8List bytes = await imagefile.readAsBytes();
     var result = await ImageGallerySaver.saveImage(bytes,
-        quality: 80, name: "my_mage.jpg");
+        quality: 80, name: getRandomString(8));
     if (result["isSuccess"] == true) {
       print("Image saved successfully.");
-      
+      _saveNewsandGoBack(result["filePath"]);
     } else {
       print(result["errorMessage"]);
     }
+  }
+
+  Future<bool> _saveNewsandGoBack(String localImageUrl) async {
+    const filePrefix = 'file:///';
+    if (localImageUrl.startsWith(filePrefix)) {
+      localImageUrl = localImageUrl.replaceAll(filePrefix, '');
+    }
+    Navigator.of(context).pop(NewsFeed(
+      imageUrl: '',
+      imageLocalUrl: localImageUrl,
+      newsTitle: title,
+      newsContent: '',
+      videoUrl: '',
+    ));
+    return false;
   }
 
   @override
@@ -102,10 +127,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   maxLines: 5,
                   minLines: 1,
                   decoration: const InputDecoration(
-                    label: Text('Title'),
-                    border: OutlineInputBorder()
-                  ),
-                  onSaved: (value) {
+                      label: Text('Title'), border: OutlineInputBorder()),
+                  onChanged: (value) {
                     title = value!;
                   },
                 ),
@@ -131,8 +154,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     //crop button --------------------
                     imagepath != ""
                         ? ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent),
                             onPressed: () {
                               _cropImage();
                             },
