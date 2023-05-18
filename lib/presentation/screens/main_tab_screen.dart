@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:news_app/presentation/screens/LoginScreen.dart';
 import 'package:news_app/presentation/screens/favourite_screen.dart';
+import 'package:news_app/presentation/screens/nested_listview.dart';
 import 'package:news_app/presentation/screens/news_home_screen.dart';
 import 'package:news_app/presentation/screens/setting_screen.dart';
 
@@ -85,7 +86,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
 }
 
 const pages = [
-  NewsHomeScreen(),
+  NestedListScreen(),
   FavouriteScreen(),
   SettingsScreen(),
 ];
